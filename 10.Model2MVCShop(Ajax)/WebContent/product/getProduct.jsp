@@ -149,10 +149,10 @@
 		<td bgcolor="D6D6D6" width="1"></td>
 		<td class="ct_write01">
 			<c:if test="${!empty product.fileName }">
-				<img src = "../images/uploadFiles/${product.fileName}"/>
+				<img src = "../images/uploadFiles/${product.fileName}" height="150"/>
 			</c:if>
 			<c:if test="${empty product.fileName }">
-				<img src = "../images/uploadFiles/empty<%=index %>.GIF"/>
+				<img src = "../images/uploadFiles/empty<%=index %>.GIF" height="150"/>
 			</c:if>
 			
 		</td>
@@ -270,7 +270,7 @@
 			<table width="100%" border="0" cellspacing="0" cellpadding="0">
 				<tr>
 					<td width="90%">
-						<input type="text" name="cmt" maxlength="100" style="width: 500px"/>
+						<input type="text" name="cmt" maxlength="100" width="*"/>
 					</td>
 					<td width="17" height="23">
 						<img src="../images/ct_btnbg01.gif" width="17" height="23"/>
@@ -299,7 +299,7 @@
 			<div>
 				<input type="hidden" name="${i}" value="${reply.replyNo}">
 				<c:forEach var="innerReply" items="${reply.innerReply}">
-					${innerReply.userId}&nbsp;&nbsp;&nbsp;${innerReply.cmt}<br/>
+					<p>${innerReply.userId}&nbsp;&nbsp;&nbsp;${innerReply.cmt}</p>
 				</c:forEach>
 				<c:if test="${!empty user }">
 					<input type="text" name="innerCmt${i}">

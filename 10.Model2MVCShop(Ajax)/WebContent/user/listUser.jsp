@@ -16,11 +16,28 @@
 		function fncGetList(currentPage){
 			$('#currentPage').val(currentPage);
 			$('form').attr('method','post').attr('action','listUser').submit();
+			$.ajax({
+				url : 'json/listUser',
+				method : 'post',
+				header : {
+					'Accept' : 'application/json',
+					'Content-Type' : 'application/json'
+				},
+				dataType : 'json',
+				data : JSON.stringify({
+					'currentPage' : currentPage,
+					'searchCondition' : $('select[name="searchCondition"]').val(),
+					'searchKeyword' : $('input[name="searchKeyword"]').val()
+				}),
+				success : function(JSONData, status){
+					
+				}
+			});
 		}
 		
 		$(function(){
 			$('td.ct_btn01:contains("검색")').bind('click',function(){
-				fncGetUserList(1);
+				fncGetList(1);
 			});
 			
 			$('span').bind('click', function(){
@@ -28,7 +45,7 @@
 			});
 			
 			$('span').css('color','red');
-			$('h6').css('color','red');
+			$('h7').css('color','red');
 			
 			$('.ct_list_pop:nth-child(4n+6)').css('background-color','rgb(220, 245, 245)');
 		});
@@ -67,7 +84,7 @@
 				<option value="0" ${!empty search.searchCondition && search.searchCondition==0 ? "selected" : ""}>회원ID</option>
 				<option value="1" ${!empty search.searchCondition && search.searchCondition==1 ? "selected" : ""}>회원명</option>
 			</select>
-			<input 	type="text" name="searchKeyword"  value="${!empty search.searchKeyword ? search.searchKeyword : ""}" 
+			<input 	type="text" name="searchKeyword"  value="${!empty search.searchKeyword ? search.searchKeyword : ''}" 
 							class="ct_input_g" style="width:200px; height:19px" >
 		</td>
 		<td align="right" width="70">
@@ -96,7 +113,7 @@
 		<td class="ct_list_b" width="100">No</td>
 		<td class="ct_line02"></td>
 		<td class="ct_list_b" width="150">
-			회원ID <h6 >(id click:상세정보)</h6>
+			회원ID <h7 >(id click:상세정보)</h7>
 		</td>
 		<td class="ct_line02"></td>
 		<td class="ct_list_b" width="150">회원명</td>

@@ -59,9 +59,6 @@
 		});
 	
 	</script>
-	<script type="text/javascript">
-		document.loginForm.userId.focus();
-	</script>
 </head>
 
 <body bgcolor="#ffffff" text="#000000" >

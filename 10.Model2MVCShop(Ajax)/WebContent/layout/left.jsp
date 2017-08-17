@@ -6,140 +6,109 @@
 <html>
 <head>
 	<title>Model2 MVC Shop</title>
-	
+	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link href="../css/left.css" rel="stylesheet" type="text/css">
-	
-	<script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
+	<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+	<link rel="stylesheet" href="/resources/demos/style.css">
+	<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+	<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 	<script type="text/javascript">
-		function history(){
-			popWin = window.open("../history.jsp","popWin","left=300, top=200, width=300, height=200, marginwidth=0, marginheight=0, scrollbars=yes, scrolling=yes, menubar=no, resizable=no");
-		}
+		$( function() {
+		  $( "#menu" ).menu();
+		} );
 		
 		$(function(){
 			
-			$("td.Depth03:contains('개인정보조회')").bind("click",function(){
+			$("div:contains('개인정보조회')").bind("click",function(){
 				$(window.parent.frames['rightFrame'].document.location).attr("href","../user/getUser?userId=${user.userId}");
 			});
 	
-			$("td.Depth03:contains('회원정보조회')").bind("click", function(){
+			$("div:contains('회원정보조회')").bind("click", function(){
 				$(window.parent.frames['rightFrame'].document.location).attr("href","../user/listUser");
 			});
 			
-			$("td.Depth03:contains('판매상품등록')").bind("click", function(){
+			$("div:contains('판매상품등록')").bind("click", function(){
 				$(window.parent.frames['rightFrame'].document.location).attr("href","../product/addProduct");
 			});
 
-			$("td.Depth03:contains('판매상품관리')").bind("click", function(){
+			$("div:contains('판매상품관리')").bind("click", function(){
 				$(window.parent.frames['rightFrame'].document.location).attr("href","../product/listProduct?menu=manage");
 			});
 
-			$("td.Depth03:contains('판매이력조회')").bind("click", function(){
+			$("div:contains('판매이력조회')").bind("click", function(){
 				$(window.parent.frames['rightFrame'].document.location).attr("href","../purchase/listSale?searchKeyword=saleList");
 			});
 
-			$("td.Depth03:contains('상 품 검 색')").bind("click", function(){
+			$("div:contains('상 품 검 색')").bind("click", function(){
 				$(window.parent.frames['rightFrame'].document.location).attr("href","../product/listProduct?menu=search");
 			});
 
-			$("td.Depth03:contains('구매이력조회')").bind("click", function(){
+			$("div:contains('구매이력조회')").bind("click", function(){
 				$(window.parent.frames['rightFrame'].document.location).attr("href","../purchase/listPurchase?searchKeyword=purchaseList&searchCondition=${user.userId}");
 			});
 
-			$("td.Depth03:contains('최근 본 상품')").bind("click", function(){
-				history();
+			$("div:contains('최근 본 상품')").bind("mouseenter", function(){
+				$(this).parent().find('ul').html('').append(history());
 			});
 
 		});
 		
+		function history(){
+			var history = '';
+			$.ajax({
+				url : '../product/json/getHistory',
+				async : false,
+				method : 'get',
+				data : null,
+				dataType : 'json',
+				header : {
+					'Accept' : 'application/json',
+					'Content-Type' : 'application/json'
+				},
+				success : function(JSONData, status){
+					for(i=0 ; i<JSONData.length ; i++){
+						history += '<li><div><a href="../product/getProduct?prodNo='+JSONData[i]+'&menu=search" target="rightFrame">'+JSONData[i]+'</a></div></li>';
+					}
+				}
+			});
+			return $(history);
+		};
+
 	</script>
+	<style>
+		.ui-menu { width: 90px; }
+	</style>
 </head>
 
 <body background="../images/left/imgLeftBg.gif" leftmargin="0" topmargin="0" marginwidth="0" marginheight="0"  >
 
-<table width="159" border="0" cellspacing="0" cellpadding="0">
-
-<!--menu 01 line-->
-	<tr>
-		<td valign="top"> 
-			<table  border="0" cellspacing="0" cellpadding="0" width="159" >	
-				<c:if test="${!empty user }">
-				<tr>
-					<td class="Depth03">
-						개인정보조회
-					</td>
-				</tr>
-				</c:if>
-		
-				<c:if test="${user.role=='admin' }">
-				<tr>
-					<td class="Depth03" >
-						회원정보조회
-					</td>
-				</tr>
-				</c:if>
-				<tr>
-					<td class="DepthEnd">&nbsp;</td>
-				</tr>
-			</table>
-		</td>
-	</tr>
-
-
-	<c:if test="${user.role=='admin' }">
-<!--menu 02 line-->
-	<tr>
-		<td valign="top"> 
-			<table  border="0" cellspacing="0" cellpadding="0" width="159">
-				<tr>
-					<td class="Depth03">
-						판매상품등록
-					</td>
-				</tr>
-				<tr>
-					<td class="Depth03">
-						판매상품관리
-					</td>
-				</tr>
-				<tr>
-					<td class="Depth03">
-						판매이력조회
-					</td>
-				</tr>
-				<tr>
-					<td class="DepthEnd">&nbsp;</td>
-				</tr>
-			</table>
-		</td>
-	</tr>
-	</c:if>
-<!--menu 03 line-->
-	<tr>
-		<td valign="top">
-			<table  border="0" cellspacing="0" cellpadding="0" width="159">
-				<tr>
-					<td class="Depth03">
-						상 품 검 색
-					</td>
-				</tr>
-				<c:if test="${!empty user }">
-				<tr>
-					<td class="Depth03">
-						구매이력조회
-					</td>
-				</tr>
-				</c:if>
-				<tr>
-					<td class="DepthEnd">&nbsp;</td>
-				</tr>
-				<tr>
-					<td class="Depth03">
-						최근 본 상품
-					</td>
-				</tr>
-			</table>
-		</td>
-	</tr>
-
-</table>
+<ul id="menu">
+<c:if test="${user.role=='admin' }">
+	<li><div>회원관리</div>
+		<ul>
+			<li><div>회원정보조회</div></li>
+		</ul>
+	</li>
+	<li><div>상품관리</div>
+		<ul>
+			<li><div>판매상품등록</div></li>
+			<li><div>판매상품관리</div></li>
+		</ul>
+	</li>
+	<li><div>판매관리</div>
+		<ul>
+			<li><div>판매이력조회</div></li>
+		</ul>
+	</li>
+	<li></li>
+</c:if>
+	<li ${!empty user ? "":"class='ui-state-disabled'"}><div>개인정보조회</div></li>
+	<li ${!empty user ? "":"class='ui-state-disabled'"}><div>구매이력조회</div></li>
+	<li></li>
+	<li><div>상 품 검 색</div></li>
+	<li><div>최근 본 상품</div>
+		<ul></ul>
+	</li>
+</ul>
 </body>
 </html>

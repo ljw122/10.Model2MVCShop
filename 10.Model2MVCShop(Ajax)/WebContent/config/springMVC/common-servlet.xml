@@ -58,7 +58,7 @@
 	<bean id="uploadFilePath"
 				class="org.springframework.core.io.FileSystemResource">
 		<constructor-arg>
-			<value>C:/Users/ljw12/git/09.Model2MVCShop/09.Model2MVCShop(jQuery)/WebContent/images/uploadFiles/</value>
+			<value>C:/Users/ljw12/git/10.Model2MVCShop/10.Model2MVCShop(Ajax)/WebContent/images/uploadFiles/</value>
 		</constructor-arg>
 	</bean>
 

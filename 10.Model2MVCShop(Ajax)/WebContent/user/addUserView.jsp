@@ -9,6 +9,8 @@
 	
 	<script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
 	<script type="text/javascript">
+		var check = false;
+		
 		function fncAddUser() {
 			// Form 유효성 검증
 			var id=$('input[name="userId"]').val();
@@ -18,6 +20,10 @@
 			
 			if(id == null || id.length <1){
 				alert("아이디는 반드시 입력하셔야 합니다.");
+				return;
+			}
+			if(!check){
+				alert("이미 존재하는 아이디 입니다.");
 				return;
 			}
 			if(pw == null || pw.length <1){
@@ -106,13 +112,27 @@
 		}
 		
 		$(function(){
-			$('td.ct_btn:contains("ID중복확인")').bind('click', function(){
-				popWin
-					= window.open("checkDuplication.jsp",
-										"popWin",
-										"left=300,top=200,width=300,height=200,marginwidth=0,marginheight=0,"+
-										"scrollbars=no,scrolling=no,menubar=no,resizable=no"
-							);
+			$('input[name="userId"]').bind('keyup', function(){
+				var userId = $(this).val().trim();
+				
+				$.ajax({
+					url : 'json/checkDuplication/'+userId,
+					method : 'get',
+					dataType : 'json',
+					headers : {
+						'Accept' : 'application/json',
+						'Content-Type' : 'application/json'
+					},
+					success : function(JSONData , status){
+						if(JSONData){
+							$('h3').html('사용 가능한 아이디 입니다.').css('color','blue');
+							check = true;
+						}else{
+							$('h3').html('이미 존재하는 아이디 입니다.').css('color','red');
+							check = false;
+						}
+					}
+				});
 			});
 		});
 		
@@ -169,20 +189,7 @@
 						<input type="text" name="userId" class="ct_input_bg" style="width:100px; height:19px"  maxLength="20" >
 					</td>
 					<td>
-						<table border="0" cellspacing="0" cellpadding="0">
-							<tr>
-								<td width="4" height="21">
-									<img src="../images/ct_btng01.gif" width="4" height="21"/>
-								</td>
-								<td 	align="center" background="../images/ct_btng02.gif" class="ct_btn" 
-										style="padding-top:3px;">
-									ID중복확인
-								</td>
-								<td width="4" height="21">
-									<img src="../images/ct_btng03.gif" width="4" height="21">
-								</td>
-							</tr>
-						</table>
+						<h3></h3>
 					</td>
 				</tr>
 			</table>
@@ -343,9 +350,6 @@
 
 </form>
 
-<script type="text/javascript">
-document.getElementById("btnCmfID").focus();
-</script>
 
 </body>
 </html>

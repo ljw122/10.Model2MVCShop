@@ -20,7 +20,7 @@ import com.model2.mvc.service.domain.User;
 import com.model2.mvc.service.user.UserService;
 
 @RestController
-@RequestMapping("user/*")
+@RequestMapping("user/json/*")
 public class UserRestController {
 
 	/*Field*/
@@ -46,7 +46,7 @@ public class UserRestController {
 //		return "redirect:addUserView.jsp";
 //	}
 	
-	@RequestMapping( value="json/addUser", method=RequestMethod.POST )
+	@RequestMapping( value="addUser", method=RequestMethod.POST )
 	public Map<String, Object> addUser(	@RequestBody User user ) throws Exception{
 
 		Map<String, Object> map = new HashMap<String, Object>();
@@ -59,7 +59,7 @@ public class UserRestController {
 		return map;
 	}
 	
-	@RequestMapping( value="json/getUser/{userId}", method=RequestMethod.GET )
+	@RequestMapping( value="getUser/{userId}", method=RequestMethod.GET )
 	public User getUser(  @PathVariable String userId ) throws Exception{
 
 		return userService.getUser(userId);
@@ -76,7 +76,7 @@ public class UserRestController {
 //		return "forward:updateUser.jsp";
 //	}
 	
-	@RequestMapping( value="json/updateUser", method=RequestMethod.POST )
+	@RequestMapping( value="updateUser", method=RequestMethod.POST )
 	public User updateUser( @RequestBody User user ) throws Exception{
 		
 		userService.updateUser(user);
@@ -89,7 +89,7 @@ public class UserRestController {
 //		return "redirect:loginView.jsp";
 //	}
 	
-	@RequestMapping( value="json/login", method=RequestMethod.POST )
+	@RequestMapping( value="login", method=RequestMethod.POST )
 	public User login( @RequestBody User user, HttpSession session) throws Exception{
 		User dbUser = userService.getUser(user.getUserId());
 		
@@ -107,17 +107,13 @@ public class UserRestController {
 //		return "redirect:../index.jsp";
 //	}
 	
-	@RequestMapping( value="json/checkDuplication", method=RequestMethod.POST )
-	public Map<String, Object> checkDuplication( @RequestBody User user ) throws Exception{
+	@RequestMapping( value="checkDuplication/{userId}", method=RequestMethod.GET )
+	public boolean checkDuplication( @PathVariable String userId ) throws Exception{
 
-		Map<String, Object> map = new HashMap<String, Object>();
-		map.put("result", userService.checkDuplication(user.getUserId()));
-		map.put("userId", user.getUserId());
-		
-		return map;
+		return userService.checkDuplication(userId);
 	}
 	
-	@RequestMapping( value="json/listUser" )
+	@RequestMapping( value="listUser" )
 	public Map<String, Object> listUser( @RequestBody Search search ) throws Exception{
 		
 		if(search.getCurrentPage()==0){

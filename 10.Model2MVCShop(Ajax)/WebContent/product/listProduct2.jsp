@@ -12,48 +12,10 @@
 <head>
 <!-- 	<title>상품 목록조회</title> -->	
 
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
-	<link rel="stylesheet" href="/resources/demos/style.css">
 	<link rel="stylesheet" href="../css/admin.css" type="text/css">
-	<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
-	<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-	<script>
-		$( function() {
-//			$( document ).tooltip({
-//				items : '[data-img]',
-//				content : function(){
-//					return '<img src="../images/uploadFiles/empty1.GIF"/>';
-//				}
-//			});
-			
-			$(document).tooltip({
-				items : '[data-img]',
-				content : function(callback){
-					$.ajax({
-						url : 'json/getProduct/search/'+$(this).parent().find('input:hidden').val(),
-						method : 'get',
-						async : false,
-						header : {
-							'Accept' : 'application/json',
-							'Content-Type' : 'application/json'
-						},
-						dataType : 'json',
-						success : function(data){
-							var src = '<img src="../images/uploadFiles/';
-							if(data.product.fileName != null){
-								src += data.product.fileName;
-							}else{
-								src += 'empty'+Math.floor(3*Math.random())+'.GIF';
-							}
-							src += '" height="125" width="125"/>';
-							callback(src);
-						}
-					});
-				}
-			});
-		} );
-		
+	
+	<script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
+	<script type="text/javascript">
 		function fncGetList(currentPage){
 			$('#currentPage').val(currentPage);
 			$('form').attr('method','post').attr('action','listProduct?menu=${menu}').submit();
@@ -148,19 +110,13 @@
 		});
 		
 		$(function(){
-			
 			$('h4').bind('click',function(){
 				self.location = 'getProduct?menu=${menu}&prodNo='+$('input:hidden[name="'+$(this).text().trim()+'"]').val();
 			});
 		});
-
+		
+		
 	</script>
-	<style>
-		label {
-		  display: inline-block;
-		  width: 5em;
-		}
-	</style>
 
 </head>
 
@@ -278,7 +234,7 @@
 					<c:when test="${empty product.proTranCode || menu=='manage' }">
 						<h4>
 							<input type="hidden" name="${product.prodName}" value="${product.prodNo}">
-							<a href='#' data-img=''>${product.prodName}</a>
+							${product.prodName}
 						</h4>
 					</c:when>
 					<c:otherwise>

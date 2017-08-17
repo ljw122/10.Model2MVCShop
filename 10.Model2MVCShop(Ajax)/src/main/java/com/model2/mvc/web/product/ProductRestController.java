@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,7 +28,7 @@ import com.model2.mvc.service.domain.Reply;
 import com.model2.mvc.service.product.ProductService;
 
 @RestController
-@RequestMapping("product/*")
+@RequestMapping("product/json/*")
 public class ProductRestController {
 
 	/*Field*/
@@ -57,7 +58,7 @@ public class ProductRestController {
 //		return new ModelAndView("forward:addProductView.jsp");
 //	}
 	
-	@RequestMapping( value="json/addProduct", method=RequestMethod.POST )
+	@RequestMapping( value="addProduct", method=RequestMethod.POST )
 	public Product addProduct( @RequestParam("product") /*Map<String, Object> map*/ String json,
 									@RequestParam("file") MultipartFile file		) throws Exception{
 		
@@ -80,7 +81,7 @@ public class ProductRestController {
 		return product;
 	}
 	
-	@RequestMapping( value="json/getProduct/{menu}/{prodNo}", method=RequestMethod.GET )
+	@RequestMapping( value="getProduct/{menu}/{prodNo}", method=RequestMethod.GET )
 	public Map<String, Object> getProduct(	@PathVariable String menu,
 									@PathVariable int prodNo	) throws Exception{
 		
@@ -95,7 +96,7 @@ public class ProductRestController {
 		return map;
 	}
 	
-	@RequestMapping( value="json/updateProduct", method=RequestMethod.POST )
+	@RequestMapping( value="updateProduct", method=RequestMethod.POST )
 	public Product updateProduct(	@RequestBody Product product,
 										@RequestParam("file") MultipartFile file	) throws Exception{
 
@@ -120,7 +121,7 @@ public class ProductRestController {
 	
 	
 	
-	@RequestMapping( value="json/listProduct/{menu}" )
+	@RequestMapping( value="listProduct/{menu}" )
 	public Map<String, Object> listProduct(@RequestBody Search search, @PathVariable String menu) throws Exception{
 		if(search.getCurrentPage()==0){
 			search.setCurrentPage(1);
@@ -153,7 +154,7 @@ public class ProductRestController {
 		return map;
 	}
 	
-	@RequestMapping( value="json/addProductComment", method=RequestMethod.POST )
+	@RequestMapping( value="addProductComment", method=RequestMethod.POST )
 	public List<Reply> addProductComment(@RequestBody Product product, @RequestBody Reply reply) throws Exception{
 		List<Reply> list = new ArrayList<Reply>();
 		
@@ -165,5 +166,15 @@ public class ProductRestController {
 		return list;
 	}
 	
+	@RequestMapping( value="getHistory", method=RequestMethod.GET)
+	public List<String> getHistory(@CookieValue("history") String history){
+		List<String> list = new ArrayList<String>();
+		if(history != null){
+			for(String h : history.split(",")){
+				list.add(h);
+			}
+		}
+		return list;
+	}
 	
 }
