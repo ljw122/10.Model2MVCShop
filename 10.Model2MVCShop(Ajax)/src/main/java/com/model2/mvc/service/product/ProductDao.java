@@ -21,6 +21,6 @@ public interface ProductDao {
 	
 	public void insertProductComment(Product product) throws Exception;
 
-	
+	public List<String> getProductNames(String prodName) throws Exception;
 
 }

@@ -22,4 +22,5 @@ public interface ProductService {
 	
 	public void addProductComment(Product product) throws Exception;
 	
+	public List<String> getProductNames(String prodName) throws Exception;
 }

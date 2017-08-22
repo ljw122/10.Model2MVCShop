@@ -67,4 +67,11 @@ public class ProductServiceImpl implements ProductService {
 		productDao.insertProductComment(product);
 	}
 
+	@Override
+	public List<String> getProductNames(String prodName) throws Exception {
+		// TODO Auto-generated method stub
+		return productDao.getProductNames(prodName);
+	}
+
+	
 }

@@ -19,22 +19,42 @@
 	<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
 	<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 	<script>
-		$( function() {
-//			$( document ).tooltip({
-//				items : '[data-img]',
-//				content : function(){
-//					return '<img src="../images/uploadFiles/empty1.GIF"/>';
-//				}
-//			});
-			
+		var currentPage = 1,
+			menu,
+			searchCondition,
+			searchKeyword,
+			searchKeyword2,
+			orderCondition,
+			orderOption;
+
+		function init(){
+
+			$('div.ct_list_pop span:nth-child(1)').css('width', '70px').css('display','inline-block');
+			$('div.ct_list_pop span:nth-child(2)').css('width', '150px').css('display','inline-block');
+			$('div.ct_list_pop span:nth-child(3)').css('width', '100px').css('display','inline-block');
+			$('div.ct_list_pop span:nth-child(4)').css('width', '100%-470px').css('display','inline-block');
+			$('div.ct_list_pop span:nth-child(5)').css('width', '150px')
+													.css('display','inline-block')
+													.css('float','right');
+
+			$('.ct_list_pop:nth-child(2n+1)').css('background-color','rgb(220, 245, 245)');
+
+			$('h4').bind('click',function(){
+				self.location = 'getProduct?menu=${menu}&prodNo='+$(this).find('input:hidden').val();
+			});
+
 			$(document).tooltip({
 				items : '[data-img]',
+				hide : {
+					effect : 'explode',
+					delay : 100
+				},
 				content : function(callback){
 					$.ajax({
 						url : 'json/getProduct/search/'+$(this).parent().find('input:hidden').val(),
 						method : 'get',
 						async : false,
-						header : {
+						headers : {
 							'Accept' : 'application/json',
 							'Content-Type' : 'application/json'
 						},
@@ -52,24 +72,140 @@
 					});
 				}
 			});
-		} );
-		
-		function fncGetList(currentPage){
-			$('#currentPage').val(currentPage);
-			$('form').attr('method','post').attr('action','listProduct?menu=${menu}').submit();
 		}
+
+		
+		function fncNextList(){
+			currentPage++;
+			menu = $('input:hidden[name="menu"]').val();
+			searchCondition = $('select[name="searchCondition"]').val();
+			searchKeyword = $('input:text[name="searchKeyword"]').val();
+			if(searchCondition == 2){
+				searchKeyword2 = $('input:text[name="searchKeyword2"]').val();
+			}else{
+				searchKeyword2 = null;
+			}
+			orderCondition = $('input:hidden[name="orderCondition"]').val();
+			orderOption = $('input:hidden[name="orderOption"]').val();
+			stockView = $('input[name="stockView"]').attr('checked')? true : false;
+			
+			$.ajax({
+				url : 'json/listProduct/'+menu,
+				method : 'post',
+				async : false,
+				dataType : 'json',
+				data : JSON.stringify({
+						currentPage : currentPage,
+						searchCondition : searchCondition,
+						searchKeyword : searchKeyword,
+						searchKeyword2 : searchKeyword2,
+						orderCondition : orderCondition,
+						orderOption : orderOption,
+						stockView : stockView
+				}),
+				headers : {
+					'Accept' : 'application/json',
+					'Content-Type' : 'application/json'
+				},
+				success : function(JSON){
+					var i = JSON.resultPage.totalCount - (JSON.resultPage.currentPage-1)*JSON.resultPage.pageSize + 1;
+					for( x in JSON.list){
+						i--;
+						var product = JSON.list[x];
+						var list = '<div class="ct_list_pop">'+'<span>'+i+'</span>'+'<span>';
+						if(product.proTranCode == null || product.proTranCode == '' || menu == 'manage'){
+							list += '<h4><input type="hidden" name="'+product.prodName+'" value="'+product.prodNo+'">';
+							list += '<a href="#" data-img="">'+product.prodName+'</a></h4>';
+						}else{
+							list += product.prodName;
+						}
+						list += '</span><span>'+product.price+'</span><span>';
+						list += menu=='manage'? product.regDate : product.prodDetail;
+						list += '</span><span>';
+						list += menu=='manage'? product.stock : (product.stock==0? '재고없음' : '판매중');
+						list += '</span></div>';
+
+						$('div.product_list').html($('div.product_list').html() + list);
+					}
+					init();
+				},
+				statusCode : {
+					404 : function(){
+						alert('404맨');
+					},
+					405 : function(){
+						alert('405맨');
+					},
+					400 : function(){
+						alert('400맨');
+					},
+					415 : function(){
+						alert('415맨');
+					}
+				}
+			});
+		}
+		
+		function callTag(){
+			$.ajax({
+				url : 'json/getProductNames/',
+//				url : 'json/getProductNames/'+$('input:text[name="searchKeyword"]').val().trim(),
+				method : 'post',
+//				method : 'get',
+				dataType : 'json',
+				data : JSON.stringify({
+					searchKeyword : $('input:text[name="searchKeyword"]').val().trim()
+				}),
+				headers : {
+					'Accept' : 'application/json',
+					'Content-Type' : 'application/json'
+				},
+				success : function(JSONData){
+					$('input:text[name="searchKeyword"]').autocomplete({
+						source : JSONData
+					});
+				},
+				statusCode : {
+					404 : function(){
+						alert('404맨');
+					},
+					405 : function(){
+						alert('405맨');
+					},
+					400 : function(){
+						alert('400맨');
+					},
+					415 : function(){
+						alert('415맨');
+					}
+				}
+			});
+		}
+
+		function fncGetList(){
+			$('#currentPage').val(currentPage);
+			$('form').attr('method','post').attr('action','listProduct').submit();
+		}
+
 		function fncOrderList(orderCondition, orderOption){
 			$('#orderCondition').val(orderCondition);
 			$('#orderOption').val(orderOption);
-			fncGetList(1);
+			currentPage = 1;
+			fncGetList();
 		}
 		
+		$( function() {
+			init();
+			while($(document).height() == $(window).height() && currentPage < $('input:hidden[name="maxPage"]').val()){
+				fncNextList();
+			}
+			
+		} );
+
 		$(function(){
 			
 			var orderOption = $('input:hidden[name="orderOption"]').val();
 			var orderCondition = $('input:hidden[name="orderCondition"]').val();
-			
-			$('.ct_list_pop:nth-child(4n+4)').css('background-color','rgb(220, 245, 245)');
 			
 			$('select[name="searchCondition"]').bind('change',function(){
 				
@@ -77,8 +213,8 @@
 
 				if($(this).val()==2){
 
-					$('span').replaceWith(
-						'<span>'
+					$('span.search').replaceWith(
+						'<span class="search">'
 							+'<input type="text" name="searchKeyword" value="${search.searchKeyword}"'
 								+'class="ct_input_g" style="width:65px; height:19px" />&nbsp;이상 &nbsp;'
 							+'<input type="text" name="searchKeyword2" value="${search.searchKeyword2}"'
@@ -86,8 +222,8 @@
 						+'</span>'
 					);
 				}else{
-					$('span').replaceWith(
-						'<span>'
+					$('span.search').replaceWith(
+						'<span class="search">'
 							+'<input type="text" name="searchKeyword" value="${search.searchKeyword}"'
 								+'class="ct_input_g" style="width:200px; height:19px" />'
 						+'</span>'
@@ -114,7 +250,8 @@
 			});
 			
 			$('input:checkbox[name="stockView"]').bind('change',function(){
-				fncGetList(1);
+				currentPage = 1;
+				fncGetList();
 			});
 		});
 		
@@ -123,37 +260,48 @@
 				if(event.keyCode == '13'){
 					event.preventDefault();
 					if($('select[name="searchCondition"]').val()==2){
-						if( ($('input:text[name="searchKeyword"]') != null && !$.isNumeric($('input:text[name="searchKeyword"]').val()) )
-								|| ( $('input:text[name="searchKeyword2"]') != null && !$.isNumeric($('input:text[name="searchKeyword2"]').val()) ) ){
+						if( ($('input:text[name="searchKeyword"]') != null && $('input:text[name="searchKeyword"]').val() != '' && !$.isNumeric($('input:text[name="searchKeyword"]').val()) )
+								|| ( $('input:text[name="searchKeyword2"]') != null && $('input:text[name="searchKeyword2"]').val() != '' && !$.isNumeric($('input:text[name="searchKeyword2"]').val()) ) ){
 							alert('가격 검색은 숫자로만 가능합니다!');
 							$('input:text').val('');
 							return;
 						}
 					}
-					fncGetList(1);
+					currentPage = 1;
+					fncGetList();
 				}
+			}).bind('keyup',function(event){
+				if( $('select[name="searchCondition"]').val()==1 ){
+					if($(this).val().trim() != ''){
+						callTag();
+					};
+				};
 			});
 			
 			$('.ct_btn01:contains("검색")').bind('click',function(){
 				if($('select[name="searchCondition"]').val()==2){
-					if( ($('input:text[name="searchKeyword"]') != null && !$.isNumeric($('input:text[name="searchKeyword"]').val()) )
-							|| ( $('input:text[name="searchKeyword2"]') != null && !$.isNumeric($('input:text[name="searchKeyword2"]').val()) ) ){
+					if( ($('input:text[name="searchKeyword"]') != null && $('input:text[name="searchKeyword"]').val() != '' && !$.isNumeric($('input:text[name="searchKeyword"]').val()) )
+							|| ( $('input:text[name="searchKeyword2"]') != null && $('input:text[name="searchKeyword2"]').val() != '' && !$.isNumeric($('input:text[name="searchKeyword2"]').val()) ) ){
 						alert('가격 검색은 숫자로만 가능합니다!');
 						$('input:text').val('');
 						return;
 					}
 				}
-				fncGetList(1);
+				currentPage = 1;
+				fncGetList();
 			});
 		});
 		
-		$(function(){
-			
-			$('h4').bind('click',function(){
-				self.location = 'getProduct?menu=${menu}&prodNo='+$('input:hidden[name="'+$(this).text().trim()+'"]').val();
-			});
-		});
 
+		$(window).scroll(function(event){
+			if(currentPage < $('input:hidden[name="maxPage"]').val()){
+				if(pageYOffset == ($(document).height()-$(window).height())){
+					window.scrollTo(0,$(document).height()-$(window).height()-1);
+					fncNextList();
+				}
+			}
+		});
+		
 	</script>
 	<style>
 		label {
@@ -169,7 +317,8 @@
 <div style="width:98%; margin-left:10px;">
 
 <form name="detailForm">
-
+<input type="hidden" name="menu" value="${menu}"/>
+<input type="hidden" name="maxPage" value="${resultPage.maxPage}"/>
 <table width="100%" height="37" border="0" cellpadding="0"	cellspacing="0">
 	<tr>
 		<td width="15" height="37">
@@ -204,7 +353,7 @@
 				<option value="1" ${!empty search.searchCondition && search.searchCondition==1 ? "selected" : ""} >상품명</option>
 				<option value="2" ${!empty search.searchCondition && search.searchCondition==2 ? "selected" : ""} >상품가격</option>
 			</select>
-			<span>
+			<span class="search">
 				<c:if test="${search.searchCondition == '1'}">
 					<input type="text" name="searchKeyword" value="${search.searchKeyword}"
 						class="ct_input_g" style="width:200px; height:19px" />
@@ -238,7 +387,7 @@
 
 <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-top:10px;">
 	<tr>
-		<td colspan="11" >전체 ${resultPage.totalCount} 건수, 현재 ${resultPage.currentPage} 페이지</td>
+		<td colspan="11" >전체 ${resultPage.totalCount} 건수</td>
 	</tr>
 	<tr>
 		<td class="ct_list_b" width="70">No</td>
@@ -261,63 +410,47 @@
 	<tr>
 		<td colspan="11" bgcolor="808285" height="1"></td>
 	</tr>
-		
+</table>
 
 	<!-- 여기서 for문 돌려 pageSize 수로 -->
-	<c:set var="i" value="${resultPage.totalCount- (resultPage.currentPage-1)*resultPage.pageSize + 1 }"/>
-	<c:forEach var="product" items="${list}">
-		<c:set var="i" value="${i-1}"/>
-		<tr class="ct_list_pop">
-			<td align="center">
-				${i }
-			</td>
-			<td></td>
-					
-			<td align="left">
-				<c:choose>
-					<c:when test="${empty product.proTranCode || menu=='manage' }">
-						<h4>
-							<input type="hidden" name="${product.prodName}" value="${product.prodNo}">
-							<a href='#' data-img=''>${product.prodName}</a>
-						</h4>
-					</c:when>
-					<c:otherwise>
-						${product.prodName }
-					</c:otherwise>
-				</c:choose>
-				
-			</td>
-			
-			<td></td>
-			<td align="left">${product.price}</td>
-			<td></td>
-			<td align="left">${menu=='manage'? product.regDate : product.prodDetail }</td>
-			<td></td>
-			<td align="left">
+<div class="product_list">
+<c:set var="i" value="${resultPage.totalCount- (resultPage.currentPage-1)*resultPage.pageSize + 1 }"/>
+<c:forEach var="product" items="${list}">
+	<c:set var="i" value="${i-1}"/>
+	<div class="ct_list_pop">
+		<span>
+			${i }
+		</span>
+		<span>
 			<c:choose>
-				<c:when test="${menu=='manage' }">
-					${product.stock }
+				<c:when test="${empty product.proTranCode || menu=='manage' }">
+					<h4>
+						<input type="hidden" name="${product.prodName}" value="${product.prodNo}">
+						<a href='#' data-img=''>${product.prodName}</a>
+					</h4>
 				</c:when>
 				<c:otherwise>
-					${product.stock==0 ? "재고없음" : "판매중" }
+					${product.prodName }
 				</c:otherwise>
 			</c:choose>
-			</td>	
-		</tr>
-		<tr>
-			<td colspan="11" bgcolor="D6D7D6" height="1"></td>
-		</tr>	
-	</c:forEach>
-</table>
-
-<table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-top:10px;">
-	<tr>
-		<td align="center">
-			<input type="hidden" id="currentPage" name="currentPage" value="1"/>
-			<jsp:include page="../common/pageNavigator.jsp"/>
-    	</td>
-	</tr>
-</table>
+			
+		</span>
+		
+		<span>${product.price}</span>
+		<span>${menu=='manage'? product.regDate : product.prodDetail }</span>
+		<span>
+		<c:choose>
+			<c:when test="${menu=='manage' }">
+				${product.stock }
+			</c:when>
+			<c:otherwise>
+				${product.stock==0 ? "재고없음" : "판매중" }
+			</c:otherwise>
+		</c:choose>
+		</span>	
+	</div>
+</c:forEach>
+</div>
 <!-- 페이지 Navigator 끝 -->
 
 </form>

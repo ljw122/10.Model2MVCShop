@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!DOCTYPE html>
 <%@ page contentType="text/html; charset=euc-kr" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
@@ -13,12 +13,10 @@
 	<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
 	<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 	<script type="text/javascript">
-		$( function() {
-		  $( "#menu" ).menu();
-		} );
 		
 		$(function(){
-			
+			$( "#menu" ).menu();
+		
 			$("div:contains('개인정보조회')").bind("click",function(){
 				$(window.parent.frames['rightFrame'].document.location).attr("href","../user/getUser?userId=${user.userId}");
 			});
@@ -50,7 +48,6 @@
 			$("div:contains('최근 본 상품')").bind("mouseenter", function(){
 				$(this).parent().find('ul').html('').append(history());
 			});
-
 		});
 		
 		function history(){
@@ -61,7 +58,7 @@
 				method : 'get',
 				data : null,
 				dataType : 'json',
-				header : {
+				headers : {
 					'Accept' : 'application/json',
 					'Content-Type' : 'application/json'
 				},

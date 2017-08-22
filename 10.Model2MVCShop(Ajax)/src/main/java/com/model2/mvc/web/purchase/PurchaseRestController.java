@@ -19,7 +19,7 @@ import com.model2.mvc.service.product.ProductService;
 import com.model2.mvc.service.purchase.PurchaseService;
 
 @RestController
-@RequestMapping("purchase/*")
+@RequestMapping("purchase/json/*")
 public class PurchaseRestController {
 
 	/*Field*/
@@ -43,12 +43,12 @@ public class PurchaseRestController {
 	}
 	
 	/*Method*/
-	@RequestMapping( value="json/addPurchase/{prodNo}", method=RequestMethod.GET )
+	@RequestMapping( value="addPurchase/{prodNo}", method=RequestMethod.GET )
 	public Product addPurchase(	@PathVariable int prodNo) throws Exception{
 		return productService.getProduct(prodNo);
 	}
 	
-	@RequestMapping( value="json/addPurchase", method=RequestMethod.POST )
+	@RequestMapping( value="addPurchase", method=RequestMethod.POST )
 	public Purchase addPurchase(	@RequestBody Purchase purchase	) throws Exception{
 
 		purchaseService.addPurchase(purchase);
@@ -56,7 +56,7 @@ public class PurchaseRestController {
 		return purchase;
 	}
 	
-	@RequestMapping( value="json/getPurchase/{tranNo}", method=RequestMethod.GET )
+	@RequestMapping( value="getPurchase/{tranNo}", method=RequestMethod.GET )
 	public Purchase getPurchase(	@PathVariable int tranNo	)throws Exception{
 		
 		Purchase purchase = new Purchase();
@@ -66,7 +66,7 @@ public class PurchaseRestController {
 		return purchase;
 	}
 	
-	@RequestMapping( value="json/updatePurchase", method=RequestMethod.POST )
+	@RequestMapping( value="updatePurchase", method=RequestMethod.POST )
 	public Purchase updatePurchase(	@RequestBody Purchase purchase	) throws Exception{
 		
 		purchaseService.updatePurchase(purchase);
@@ -74,13 +74,13 @@ public class PurchaseRestController {
 		return purchaseService.getPurchase(purchase);
 	}
 	
-	@RequestMapping( value="json/listPurchase" )
+	@RequestMapping( value="listPurchase" )
 	public Map<String, Object> listPurchase(	@RequestBody Search search	) throws Exception{
 		
 		return this.getList(search);
 	}
 	
-	@RequestMapping( value="json/updateTranCode/{menu}", method=RequestMethod.POST )
+	@RequestMapping( value="updateTranCode/{menu}", method=RequestMethod.POST )
 	public Map<String, Object> updateTranCode(	@PathVariable String menu,
 									@RequestBody Purchase purchase	) throws Exception{
 		

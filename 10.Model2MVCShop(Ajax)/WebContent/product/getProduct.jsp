@@ -17,7 +17,7 @@
 	<link rel="stylesheet"
 		href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 	<link rel="stylesheet" href="/resources/demos/style.css">
-	<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+	<script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
 	<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 	
 	<script type="text/javascript">
@@ -33,7 +33,7 @@
 			});
 			
 			$('td.ct_btn01:contains("구매")').bind('click',function(){
-				self.location('../purchase/addPurchase?prodNo=${product.prodNo}');
+				self.location.href = '../purchase/addPurchase?prodNo=${product.prodNo}';
 			});
 			
 			$('td.ct_btn01:contains("이전")').bind('click',function(){
@@ -223,7 +223,9 @@
 					<img src="../images/ct_btnbg01.gif" width="17" height="23"/>
 				</td>
 				<td background="../images/ct_btnbg02.gif" class="ct_btn01" style="padding-top: 3px;">
-					구매
+					<c:if test="${product.stock != 0}">
+						구매
+					</c:if>
 				</td>
 				<td width="14" height="23">
 					<img src="../images/ct_btnbg03.gif" width="14" height="23">

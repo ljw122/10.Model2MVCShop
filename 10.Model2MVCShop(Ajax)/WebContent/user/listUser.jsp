@@ -13,42 +13,93 @@
 
 	<script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
 	<script type="text/javascript">
-		function fncGetList(currentPage){
-			$('#currentPage').val(currentPage);
-			$('form').attr('method','post').attr('action','listUser').submit();
+		var currentPage = 1,
+			searchCondition,
+			searchKeyword;
+		
+		function init(){
+			$('div.ct_list_pop span:nth-child(1)').css('width', '100px').css('display','inline-block');
+			$('div.ct_list_pop span:nth-child(2)').css('width', '150px')
+													.css('display','inline-block')
+													.css('color','red')
+													.bind('click', function(){
+														self.location = 'getUser?userId='+$(this).text().trim();
+													});
+			$('div.ct_list_pop span:nth-child(3)').css('width', '150px').css('display','inline-block');
+			$('div.ct_list_pop span:nth-child(4)').css('display','inline-block');
+			
+			$('h7').css('color','red');
+			
+			$('.ct_list_pop:nth-child(2n+2)').css('background-color','rgb(220, 245, 245)');
+
+		}
+		
+		function fncNextList(){
+			currentPage++;
+			searchCondition = $('select[name="searchCondition"]').val();
+			searchKeyword = $('input:text[name="searchKeyword"]').val();
+			
 			$.ajax({
 				url : 'json/listUser',
 				method : 'post',
-				header : {
+				async : false,
+				headers : {
 					'Accept' : 'application/json',
 					'Content-Type' : 'application/json'
 				},
 				dataType : 'json',
 				data : JSON.stringify({
-					'currentPage' : currentPage,
-					'searchCondition' : $('select[name="searchCondition"]').val(),
-					'searchKeyword' : $('input[name="searchKeyword"]').val()
+					currentPage : currentPage,
+					searchCondition : searchCondition,
+					searchKeyword : searchKeyword
 				}),
-				success : function(JSONData, status){
-					
+				success : function(JSON){
+					var i = JSON.resultPage.totalCount - (JSON.resultPage.currentPage-1)*JSON.resultPage.pageSize + 1;
+					for( x in JSON.list){
+						i--;
+						var user = JSON.list[x];
+						var list = '<div class="ct_list_pop">';
+						list += '<span>'+i+'</span>';
+						list += '<span>'+user.userId+'</span>';
+						list += '<span>'+user.userName+'</span>';
+						list += '<span>'+user.email+'</span></div>';
+						
+						$('div.user_list').html($('div.user_list').html() + list);
+					}
+					init();
 				}
 			});
 		}
-		
+
+		function fncGetList(){
+			$('#currentPage').val(currentPage);
+			$('form').attr('method','post').attr('action','listProduct').submit();
+		}
+
 		$(function(){
 			$('td.ct_btn01:contains("검색")').bind('click',function(){
-				fncGetList(1);
+				currentPage = 1;
+				fncGetList();
 			});
-			
-			$('span').bind('click', function(){
-				self.location = 'getUser?userId='+$(this).text().trim();
-			});
-			
-			$('span').css('color','red');
-			$('h7').css('color','red');
-			
-			$('.ct_list_pop:nth-child(4n+6)').css('background-color','rgb(220, 245, 245)');
 		});
+
+		$(function(){
+			init();
+
+			while($(document).height() == $(window).height() && currentPage < $('input:hidden[name="maxPage"]').val()){
+				fncNextList();
+			}
+		});
+		
+		$(window).scroll(function(event){
+			if(currentPage < $('input:hidden[name="maxPage"]').val()){
+				if(pageYOffset == ($(document).height()-$(window).height())){
+					window.scrollTo(0,$(document).height()-$(window).height()-1);
+					fncNextList();
+				}
+			}
+		});
+		
 	</script>
 
 </head>
@@ -58,7 +109,7 @@
 <div style="width:98%; margin-left:10px;">
 
 <form name="detailForm" >
-
+<input type="hidden" name="maxPage" value="${resultPage.maxPage}"/>
 <table width="100%" height="37" border="0" cellpadding="0"	cellspacing="0">
 	<tr>
 		<td width="15" height="37">
@@ -123,36 +174,20 @@
 	<tr>
 		<td colspan="11" bgcolor="808285" height="1"></td>
 	</tr>
-	
-	<c:set var="i" value="0"/>
-	<c:forEach var="user" items="${list}">
-		<c:set var="i" value="${i+1}"/>
-		<tr class="ct_list_pop">
-			<td align="center">${i}</td>
-			<td></td>
-			<td align="left">
-				<span>${user.userId}</span>
-			</td>
-			<td></td>
-			<td align="left">${user.userName}</td>
-			<td></td>
-			<td align="left">${user.email}
-			</td>		
-		</tr>
-		<tr>
-			<td colspan="11" bgcolor="D6D7D6" height="1"></td>
-		</tr>
-	</c:forEach>
 </table>
 
-<table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-top:10px;">
-	<tr>
-		<td align="center">
-			<input type="hidden" id="currentPage" name="currentPage" value="1"/>
-			<jsp:include page="../common/pageNavigator.jsp"/>
-    	</td>
-	</tr>
-</table>
+<div class="user_list">
+<c:set var="i" value="${resultPage.totalCount - (resultPage.currentPage-1)*resultPage.pageSize + 1}"/>
+<c:forEach var="user" items="${list}">
+	<c:set var="i" value="${i-1}"/>
+	<div class="ct_list_pop">
+		<span>${i}</span>
+		<span>${user.userId}</span>
+		<span>${user.userName}</span>
+		<span>${user.email}</span>
+	</div>
+</c:forEach>
+</div>
 <!--  페이지 Navigator 끝 -->
 </form>
 </div>

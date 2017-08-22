@@ -1,5 +1,6 @@
 package com.model2.mvc.service.product.impl;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -62,5 +63,14 @@ public class ProductDaoImpl implements ProductDao{
 	public void insertProductComment(Product product) throws Exception{
 		
 		sqlSession.insert("ProductMapper.insertProductComment", product);
+	}
+	
+	public List<String> getProductNames(String prodName) throws Exception{
+		List<Product> list = sqlSession.selectList("ProductMapper.getProductNames", prodName); 
+		List<String> returnList = new ArrayList<String>();
+		for(Product product : list){
+			returnList.add(product.getProdName());
+		}
+		return returnList;
 	}
 }

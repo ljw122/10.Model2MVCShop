@@ -12,25 +12,88 @@
 	
 	<script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
 	<script type="text/javascript">
-		function fncGetList(currentPage){
-			$("#currentPage").val(currentPage);
-			$('form').attr('method','post').attr('action','listPurchase?searchCondition=${user.userId}&searchKeyword=purchaseList').submit();
+		var currentPage = 1,
+			searchKeyword = 'purchaseList',
+			searchCondition = '${user.userId}';
+			
+		function init(){
+			$('.ct_list_pop:nth-child(2n+2)').css('background-color','rgb(220, 245, 245)');
+		
+			$('.ct_list_pop span:nth-child(1)').css('width','70px').css('display','inline-block');
+			$('.ct_list_pop span:nth-child(2)').css('width','180px').css('display','inline-block')
+				.bind('click',function(){
+					self.location = 'getPurchase?tranNo='+$(this).find('input:hidden').val();
+				});
+			$('.ct_list_pop span:nth-child(3)').css('width','180px').css('display','inline-block');
+			$('.ct_list_pop span:nth-child(4)').css('width','150px').css('display','inline-block');
+			$('.ct_list_pop span:nth-child(5)').css('width','100px').css('display','inline-block');
+			$('.ct_list_pop span:nth-child(6)').css('width','70px').css('display','inline-block').css('float','right')
+				.bind('click',function(){
+					self.location = 'updateTranCode?tranNo='+$(this).find('input:hidden').val()+'&tranCode=3&menu=search&buyer.userId=${user.userId}';
+				});
+		};
+
+		function fncNextList(){
+			currentPage++;
+			$.ajax({
+				url : 'json/listPurchase',
+				method : 'post',
+				async : false,
+				dataType : 'json',
+				data : JSON.stringify({
+					currentPage : currentPage,
+					searchKeyword : searchKeyword,
+					searchCondition : searchCondition
+				}),
+				headers : {
+					'Accept' : 'application/json',
+					'Content-Type' : 'application/json'
+				},
+				success : function(JSON){
+					var i = JSON.resultPage.totalCount - (JSON.resultPage.currentPage-1)*JSON.resultPage.pageSize + 1;
+					for( x in JSON.list){
+						i--;
+						var purchase = JSON.list[x];
+						var list = '<div class="ct_list_pop">';
+						list += '<span>'+i+'</span>';
+						list += '<span><input type="hidden" name="tranNo" value="'+purchase.tranNo+'">'+purchase.purchaseProd.prodName+'&nbsp;&nbsp;(수량 : '+purchase.purchaseCount+')</span>';
+						list += '<span>'+purchase.dlvyAddr+'</span>';
+						list += '<span>'+purchase.receiverPhone+'</span>';
+						list += '<span>';
+						if(purchase.tranCode == 1){
+							list += '구매완료';
+						}else if(purchase.tranCode == 2){
+							list += '배송중';
+						}else{
+							list += '배송완료';
+						}
+						list += '</span>';
+						list += '<span>'+(purchase.tranCode == 2 ? '물건도착' : '')+'</span>';
+						list += '</div>';
+						
+						$('div.purchase_list').html($('div.purchase_list').html() + list);
+					}
+					init();
+				}
+			});
 		}
 		
 		$(function(){
-			$('.ct_list_pop:nth-child(4n+4)').css('background-color','rgb(220, 245, 245)');
+			init();
+			while($(document).height() == $(window).height() && currentPage < $('input:hidden[name="maxPage"]').val()){
+				fncNextList();
+			}
+		});
+
+		$(window).scroll(function(event){
+			if(currentPage < $('input:hidden[name="maxPage"]').val()){
+				if(pageYOffset == ($(document).height()-$(window).height())){
+					window.scrollTo(0,$(document).height()-$(window).height()-1);
+					fncNextList();
+				}
+			}
 		});
 		
-		$(function(){
-			$('.ct_list_pop td:nth-child(3) h4').bind('click',function(){
-				self.location = 'getPurchase?tranNo='+$(this).find('input:hidden').val();
-			});
-
-			$('.ct_list_pop td:nth-child(11) h4').bind('click',function(){
-				self.location = 'updateTranCode?tranNo='+$(this).find('input:hidden').val()+'&tranCode=3&menu=search&buyer.userId=${user.userId}';
-			});
-
-		});
 		
 	</script>
 
@@ -41,6 +104,7 @@
 <div style="width: 98%; margin-left: 10px;">
 
 <form name="detailForm" >
+<input type="hidden" name="maxPage" value="${resultPage.maxPage}"/>
 
 <table width="100%" height="37" border="0" cellpadding="0"	cellspacing="0">
 	<tr>
@@ -67,81 +131,56 @@
 		<td class="ct_line02"></td>
 		<td class="ct_list_b" width="180">구매물품</td>
 		<td class="ct_line02"></td>
-		<td class="ct_list_b" width="150">배송지</td>
+		<td class="ct_list_b" width="180">배송지</td>
 		<td class="ct_line02"></td>
-		<td class="ct_list_b">전화번호</td>
+		<td class="ct_list_b" width="150">전화번호</td>
 		<td class="ct_line02"></td>
 		<td class="ct_list_b">배송현황</td>
 		<td class="ct_line02"></td>
-		<td class="ct_list_b">정보수정</td>
+		<td class="ct_list_b" width="70">정보수정</td>
 	</tr>
 	<tr>
 		<td colspan="11" bgcolor="808285" height="1"></td>
 	</tr>
+</table>
 
 	
-	
+<div class="purchase_list">	
 	<c:set var="i" value="${resultPage.totalCount- (resultPage.currentPage-1)*resultPage.pageSize + 1}"/>
 	<c:forEach var="purchase" items="${list }">
 		<c:set var="i" value="${i-1 }"/>
-		<tr class="ct_list_pop">
-			<td align="center">${i }</td>
-			<td></td>
-			<td align="left">
-				<h4>
-					<input type="hidden" name="tranNo" value="${purchase.tranNo}">
-					${purchase.purchaseProd.prodName}&nbsp;&nbsp;(수량 : ${purchase.purchaseCount})
-				</h4>
-			</td>
-			<td></td>
-			<td align="left">${purchase.dlvyAddr}</td>
-			<td></td>
-			<td align="left">${purchase.receiverPhone}</td>
-			<td></td>
-			<td align="left">
+		<div class="ct_list_pop">
+			<span>${i}</span>
+			<span>
+				<input type="hidden" name="tranNo" value="${purchase.tranNo}">
+				${purchase.purchaseProd.prodName}&nbsp;&nbsp;(수량 : ${purchase.purchaseCount})
+			</span>
+			<span>${purchase.dlvyAddr}</span>
+			<span>${purchase.receiverPhone}</span>
+			<span>
 			<c:choose>
-				<c:when test="${empty purchase.tranCode }">
-					없슴..
-				</c:when>
 				<c:when test="${purchase.tranCode=='1' }">
-					현재 구매완료 상태입니다.
+					구매완료
 				</c:when>
 				<c:when test="${purchase.tranCode=='2' }">
-					현재 배송중 상태입니다.
+					배송중
 				</c:when>
 				<c:when test="${purchase.tranCode=='3' }">
-					현재 배송완료 상태입니다.
+					배송완료
 				</c:when>
 			</c:choose>
-			</td>
-			<td></td>
-			<td align="left">
+			</span>
+			<span>
 			<c:if test="${purchase.tranCode=='2' }">
-				<h4>
-					<input type="hidden" name="tranNo" value="${purchase.tranNo}">
-					물건도착
-				</h4>
+				<input type="hidden" name="tranNo" value="${purchase.tranNo}">
+				물건도착
 			</c:if>
-			</td>
-		</tr>
-		<tr>
-			<td colspan="11" bgcolor="D6D7D6" height="1"></td>
-		</tr>
+			</span>
+		</div>
 	</c:forEach>
-	
+</div>	
 
-</table>
 
-<table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-top: 10px;">
-	<tr>
-		<td align="center">
-			<input type="hidden" id="currentPage" name="currentPage" value=""/>
-			<jsp:include page="../common/pageNavigator.jsp"/>
-		</td>
-	</tr>
-</table>
-
-<!--  페이지 Navigator 끝 -->
 </form>
 
 </div>

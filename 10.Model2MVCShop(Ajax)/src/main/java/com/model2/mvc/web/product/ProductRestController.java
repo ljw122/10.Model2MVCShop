@@ -177,4 +177,17 @@ public class ProductRestController {
 		return list;
 	}
 	
+	@RequestMapping( value="getProductNames", method=RequestMethod.POST)
+	public List<String> getProductNames(@RequestBody Search search) throws Exception{
+		List<String> list = productService.getProductNames(search.getSearchKeyword()); 
+		return list;
+	}
+	
+	//ÇÑ±ÛÀÎÄÚµù¹®Á¦ ¹ß»ý...Áê·èÁê·è
+	@RequestMapping( value="getProductNames/{value}", method=RequestMethod.GET)
+	public List<String> getProductNames(@PathVariable String value) throws Exception{
+		List<String> list = productService.getProductNames(value); 
+		return list;
+	}
+	
 }

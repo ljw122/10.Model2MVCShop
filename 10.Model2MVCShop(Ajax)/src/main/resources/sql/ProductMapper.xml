@@ -148,4 +148,14 @@
 			NULL	)
 	</insert>
 	
+	<select id="getProductNames" parameterType="java.lang.String" resultMap="productSelectMap">
+		SELECT
+			prod_name
+		FROM
+			product
+		WHERE
+			prod_name LIKE '%${value}%'
+	</select>
+	
+	
 </mapper>
